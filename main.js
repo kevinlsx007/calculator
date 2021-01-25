@@ -86,8 +86,10 @@ equalBtn.addEventListener('click', () => {
   isEqualPressed = true;
   let result = calculate(equation);
   const precise = x => Number.parseFloat(x).toPrecision(6);
-  if (String(result).length > 10) {
+  if (String(result).length > 10 || result < 0.000001) {
     result = precise(result);
+  } else {
+    result = Math.round((result + Number.EPSILON) * 1000000) / 1000000
   }
   calcResult.textContent = result;
 });
@@ -140,5 +142,25 @@ function calculate(equation) {
   }
   // compute stack sum
   const stackSum = stack => stack.reduce((a, b) => a + b, 0);
-  return Math.round((stackSum(stack) + Number.EPSILON) * 1000000) / 1000000;
+  return stackSum(stack);
 }
+
+// Add keyboard support
+document.addEventListener('keydown', (event) => {
+  const keyMap = {
+    '+': 'add',
+    '-': 'subtract',
+    '*': 'multiply',
+    '/': 'divide',
+    'c': 'allclear',
+    'Backspace': 'delete',
+    '.': 'decimal',
+    '=': 'equal'
+  };
+  if (event.key in keyMap) {
+    document.getElementsByName(keyMap[event.key])[0].click();
+  }
+  if (event.keyCode >= 48 && event.keyCode <= 57) {
+    document.getElementsByName(`digit${event.key}`)[0].click();
+  }
+});
